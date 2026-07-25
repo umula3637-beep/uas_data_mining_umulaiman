@@ -6,295 +6,350 @@ import seaborn as sns
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 from sklearn.model_selection import train_test_split
 import numpy as np
+import warnings
 
-# --- KONFIGURASI HALAMAN & CSS CUSTOM ---
+warnings.filterwarnings('ignore')
+
+# ==============================================================================
+# 1. KONFIGURASI HALAMAN & CSS PREMIUM
+# ==============================================================================
 st.set_page_config(
-    page_title="Proyek Data Mining Pro", 
+    page_title="Data Mining Pro Dashboard", 
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS untuk mempercantik tampilan
+# Custom CSS untuk tampilan Premium & Modern
 st.markdown("""
 <style>
-    /* Font Global */
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+    /* Import Font Modern */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
     
+    /* Global Font */
+    .stApp, .stMarkdown, .stTextInput, .stNumberInput, .stSelectbox {
+        font-family: 'Inter', sans-serif !important;
+    }
+    
+    /* Header Styling */
     .main-header {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 600;
-        color: #2c3e50;
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: #1e3a8a;
+        margin-bottom: 0.5rem;
+    }
+    .sub-header {
+        font-size: 1.1rem;
+        color: #64748b;
+        margin-bottom: 1.5rem;
     }
     
-    /* Card Style untuk Hasil Prediksi */
-    .result-card-pos {
-        padding: 20px;
-        background-color: #d4edda;
-        border-left: 6px solid #28a745;
-        border-radius: 5px;
-        margin-top: 10px;
+    /* Card Styling untuk Hasil */
+    .pred-card {
+        padding: 24px;
+        border-radius: 12px;
+        margin-top: 15px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border-left: 6px solid;
     }
-    .result-card-neg {
-        padding: 20px;
-        background-color: #f8d7da;
-        border-left: 6px solid #dc3545;
-        border-radius: 5px;
-        margin-top: 10px;
+    .pred-positive {
+        background-color: #fef2f2;
+        border-left-color: #ef4444;
     }
-    .result-text {
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: #155724;
+    .pred-negative {
+        background-color: #f0fdf4;
+        border-left-color: #22c55e;
     }
-    .result-text-neg {
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: #721c24;
+    .pred-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+    .pred-positive .pred-title { color: #991b1b; }
+    .pred-negative .pred-title { color: #166534; }
+    .pred-desc { font-size: 0.95rem; color: #475569; line-height: 1.5; }
+
+    /* Metric Card Override */
+    div[data-testid="stMetricValue"] {
+        font-size: 1.8rem !important;
+        font-weight: 700 !important;
     }
     
-    /* Sidebar Styling */
+    /* Sidebar Polish */
     section[data-testid="stSidebar"] {
-        background-color: #f0f2f6;
+        background-color: #f8fafc;
+        border-right: 1px solid #e2e8f0;
+    }
+    
+    /* Button Polish */
+    .stButton>button {
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .stButton>button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
 </style>
 """, unsafe_allow_html=True)
 
-# NAVIGASI SIDEBAR
+# ==============================================================================
+# 2. NAVIGASI SIDEBAR
+# ==============================================================================
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/2920/2920323.png", width=100) # Placeholder Icon
-    st.title("📌 Menu Navigasi")
-    st.markdown("---")
-    page = st.radio("Pilih Halaman Proyek:", [
-        "1. Prediksi Diabetes (Klasifikasi)", 
-        "2. Clustering Gerai Kopi (K-Means)"
-    ], index=0)
+    st.markdown("### 📊 DataMining Pro")
+    st.markdown("<p style='color: #64748b; font-size: 0.9rem;'>Dashboard Analisis & Prediksi Cerdas</p>", unsafe_allow_html=True)
+    st.divider()
     
-    st.markdown("---")
-    st.caption("© 2026 Proyek Data Mining")
+    page = st.radio(
+        "Pilih Modul Analisis:", 
+        ["🩺 Prediksi Diabetes", "☕ Clustering Gerai Kopi"],
+        label_visibility="collapsed"
+    )
+    
+    st.divider()
+    st.markdown("#### ℹ️ Tentang Aplikasi")
+    st.caption("Dibangun dengan Streamlit, Scikit-Learn, dan Seaborn. Memanfaatkan algoritma KNN, Naïve Bayes, Decision Tree, dan K-Means.")
 
-# ====================================================
-# HALAMAN 1: KLASIFIKASI DIABETES
-# ====================================================
-if page == "1. Prediksi Diabetes (Klasifikasi)":
+# ==============================================================================
+# 3. HALAMAN 1: PREDIKSI DIABETES
+# ==============================================================================
+if page == "🩺 Prediksi Diabetes":
     st.markdown('<h1 class="main-header">🩺 Prediksi Risiko Diabetes</h1>', unsafe_allow_html=True)
-    st.write("Aplikasi ini menggunakan **Machine Learning** untuk memprediksi status diabetes pasien berdasarkan data medis.")
+    st.markdown('<p class="sub-header">Evaluasi risiko diabetes berdasarkan 8 indikator kesehatan utama menggunakan ensemble model machine learning.</p>', unsafe_allow_html=True)
     
     try:
         # Load Data & Model
         df_diab = pd.read_csv('diabetes.csv')
-        
-        # Otomatis cari nama kolom target
-        target_col = None
-        for col in df_diab.columns:
-            if col.lower().strip() in ['outcome', 'target', 'class', 'diabetes']:
-                target_col = col
-                break
-        if not target_col:
-            target_col = df_diab.columns[-1]
-
-        X = df_diab.drop(target_col, axis=1)
-        y = df_diab[target_col]
-        
-        # Split data hanya untuk evaluasi (tidak perlu di-load setiap kali jika model sudah jadi, tapi untuk demo kita biarkan)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-        
-        # Load 3 model pkl
         knn = joblib.load('model_knn.pkl')
         nb = joblib.load('model_nb.pkl')
         dt = joblib.load('model_dt.pkl')
         
+        target_col = next((col for col in df_diab.columns if col.lower() in ['outcome', 'target', 'class', 'diabetes']), df_diab.columns[-1])
+        X = df_diab.drop(target_col, axis=1)
+        y = df_diab[target_col]
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        
         models = {'KNN': knn, 'Naïve Bayes': nb, 'Decision Tree': dt}
         
-        # --- TAB LAYOUT ---
-        tab1, tab2, tab3 = st.tabs(["📊 Evaluasi Model", "🔍 Prediksi Pasien Baru", "ℹ️ Info Dataset"])
+        # TAB LAYOUT
+        tab_eval, tab_pred, tab_info = st.tabs(["📊 Evaluasi Model", "🔮 Prediksi Pasien Baru", "📖 Info Dataset"])
         
-        with tab1:
-            st.subheader("Performa Algoritma")
+        with tab_eval:
+            st.subheader("Performa Algoritma pada Data Uji")
             
             # Hitung Metrik
             metrics_data = []
             cm_dict = {}
             for name, model in models.items():
                 y_pred = model.predict(X_test)
-                acc = accuracy_score(y_test, y_pred)
-                prec = precision_score(y_test, y_pred)
-                rec = recall_score(y_test, y_pred)
-                f1 = f1_score(y_test, y_pred)
-                
                 metrics_data.append({
-                    'Algoritma': name,
-                    'Akurasi': round(acc, 3),
-                    'Precision': round(prec, 3),
-                    'Recall': round(rec, 3),
-                    'F1-Score': round(f1, 3)
+                    'Model': name,
+                    'Akurasi': accuracy_score(y_test, y_pred),
+                    'Precision': precision_score(y_test, y_pred),
+                    'Recall': recall_score(y_test, y_pred),
+                    'F1-Score': f1_score(y_test, y_pred)
                 })
                 cm_dict[name] = confusion_matrix(y_test, y_pred)
             
             df_metrics = pd.DataFrame(metrics_data)
             
-            # Tampilkan Metric Cards untuk Akurasi
-            cols = st.columns(len(models))
+            # Tampilkan Metric Cards (Baris 1)
+            cols = st.columns(3)
             for i, row in df_metrics.iterrows():
                 with cols[i]:
-                    st.metric(label=f"Akurasi {row['Algoritma']}", value=f"{row['Akurasi']*100:.1f}%")
-            
-            with st.expander("Lihat Detail Metrik Lengkap"):
-                st.dataframe(df_metrics.style.highlight_max(axis=0, subset=['Akurasi', 'Precision', 'Recall', 'F1-Score']), use_container_width=True)
-            
-            # Confusion Matrix
-            st.markdown("### Visualisasi Confusion Matrix")
-            selected_cm_model = st.selectbox("Pilih Model:", list(models.keys()), key="cm_select")
-            
-            fig, ax = plt.subplots(figsize=(5, 4))
-            sns.heatmap(cm_dict[selected_cm_model], annot=True, fmt='d', cmap='coolwarm', 
-                        xticklabels=['Negatif', 'Positif'], yticklabels=['Negatif', 'Positif'], ax=ax)
-            plt.title(f"Confusion Matrix - {selected_cm_model}")
-            plt.ylabel('Aktual')
-            plt.xlabel('Prediksi')
-            st.pyplot(fig)
-
-        with tab2:
-            st.subheader("Formulir Input Data Pasien")
-            st.info("Masukkan data medis pasien di bawah ini untuk mendapatkan prediksi.")
-            
-            selected_model_name = st.selectbox("Gunakan Algoritma:", list(models.keys()), key="pred_select")
-            
-            feature_names = X.columns.tolist()
-            input_values = []
-            
-            # Buat input dalam grid 3 kolom agar tidak terlalu panjang ke bawah
-            cols_input = st.columns(3)
-            for i, col_name in enumerate(feature_names):
-                default_val = float(X[col_name].median())
-                min_val = float(X[col_name].min())
-                max_val = float(X[col_name].max())
-                
-                with cols_input[i % 3]:
-                    val = st.number_input(
-                        f"{col_name.replace('_', ' ').title()}", 
-                        value=default_val, 
-                        min_value=min_val, 
-                        max_value=max_val,
-                        step=0.1,
-                        key=f"input_{col_name}"
+                    st.metric(
+                        label=f"Akurasi {row['Model']}", 
+                        value=f"{row['Akurasi']*100:.1f}%", 
+                        delta=f"F1: {row['F1-Score']:.2f}",
+                        delta_color="normal"
                     )
-                    input_values.append(val)
             
-            st.markdown("---")
-            if st.button("🚀 Jalankan Analisis Prediksi", type="primary", use_container_width=True):
-                with st.spinner("Sedang menganalisis data..."):
-                    chosen_model = models[selected_model_name]
-                    prediction = chosen_model.predict([input_values])[0]
+            # Confusion Matrix Interaktif
+            st.markdown("##### Visualisasi Confusion Matrix")
+            col_cm1, col_cm2 = st.columns([1, 2])
+            with col_cm1:
+                selected_cm = st.selectbox("Pilih Model:", list(models.keys()), key="cm_select")
+            with col_cm2:
+                fig, ax = plt.subplots(figsize=(5, 4))
+                sns.heatmap(cm_dict[selected_cm], annot=True, fmt='d', cmap='Blues', 
+                            xticklabels=['Negatif (0)', 'Positif (1)'], 
+                            yticklabels=['Negatif (0)', 'Positif (1)'], 
+                            ax=ax, cbar=False, linewidths=.5)
+                plt.title(f"Confusion Matrix: {selected_cm}", fontsize=12, fontweight='bold')
+                plt.ylabel('Kondisi Aktual', fontsize=10)
+                plt.xlabel('Hasil Prediksi', fontsize=10)
+                st.pyplot(fig)
+
+        with tab_pred:
+            st.subheader("Formulir Input Data Klinis")
+            st.info("💡 Geser slider di bawah ini sesuai dengan hasil pemeriksaan medis pasien.")
+            
+            selected_model = st.selectbox("Algoritma yang Digunakan:", list(models.keys()), index=2) # Default DT
+            
+            # Pengelompokan Input agar lebih rapi
+            st.markdown("##### 📏 Data Fisik & Demografi")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                inp_pregnancies = st.slider("Kehamilan (Pregnancies)", 0, 20, int(X['Pregnancies'].median()), help="Jumlah keer hamil")
+                inp_age = st.slider("Usia (Age)", 10, 100, int(X['Age'].median()), help="Usia pasien dalam tahun")
+            with col2:
+                inp_bmi = st.slider("BMI (Body Mass Index)", 0.0, 70.0, float(X['BMI'].median()), 0.1, help="Indeks massa tubuh (kg/m²)")
+            
+            st.markdown("##### 🩸 Data Medis & Laboratorium")
+            col3, col4, col5 = st.columns(3)
+            with col3:
+                inp_glucose = st.slider("Glukosa (Glucose)", 0, 200, int(X['Glucose'].median()), help="Kadar glukosa plasma (mg/dL)")
+                inp_bp = st.slider("Tekanan Darah (BloodPressure)", 0, 150, int(X['BloodPressure'].median()), help="Tekanan darah diastolik (mm Hg)")
+            with col4:
+                inp_skin = st.slider("Ketebalan Kulit (SkinThickness)", 0, 100, int(X['SkinThickness'].median()), help="Ketebalan kulit triceps (mm)")
+                inp_insulin = st.slider("Insulin", 0, 900, int(X['Insulin'].median()), help="Kadar insulin darah (mu U/ml)")
+            with col5:
+                inp_dpf = st.slider("Fungsi Silsilah Diabetes (DPF)", 0.0, 3.0, float(X['DiabetesPedigreeFunction'].median()), 0.01, help="Faktor risiko genetik")
+            
+            st.divider()
+            
+            # Tombol Prediksi
+            if st.button("🚀 Analisis Risiko Sekarang", type="primary", use_container_width=True):
+                with st.spinner("Sedang memproses data melalui model Machine Learning..."):
+                    input_array = np.array([[inp_pregnancies, inp_glucose, inp_bp, inp_skin, inp_insulin, inp_bmi, inp_dpf, inp_age]])
+                    prediction = models[selected_model].predict(input_array)[0]
+                    proba = models[selected_model].predict_proba(input_array)[0][1] if hasattr(models[selected_model], "predict_proba") else 0.0
                     
-                    # Tampilan Hasil
                     if prediction == 1:
-                        st.markdown("""
-                        <div class="result-card-pos">
-                            <p class="result-text">⚠️ HASIL: POSITIF DIABETES</p>
-                            <p>Pasien terindikasi memiliki risiko diabetes tinggi. Segera konsultasikan dengan dokter.</p>
+                        st.markdown(f"""
+                        <div class="pred-card pred-positive">
+                            <div class="pred-title">⚠️ HASIL: POSITIF DIABETES (Risiko Tinggi)</div>
+                            <div class="pred-desc">
+                                Berdasarkan data yang dimasukkan, model <b>{selected_model}</b> memprediksi pasien mengidap diabetes. 
+                                {"(Tingkat keyakinan model: {:.1f}%)".format(proba*100) if proba > 0 else ""}<br><br>
+                                <b>Rekomendasi:</b> Segera konsultasikan dengan dokter untuk tes HbA1c lanjutan dan evaluasi pola makan.
+                            </div>
                         </div>
                         """, unsafe_allow_html=True)
                     else:
-                        st.markdown("""
-                        <div class="result-card-neg">
-                            <p class="result-text-neg">✅ HASIL: NEGATIF DIABETES</p>
-                            <p>Pasien terindikasi sehat dari risiko diabetes. Tetap jaga pola hidup sehat.</p>
+                        st.markdown(f"""
+                        <div class="pred-card pred-negative">
+                            <div class="pred-title">✅ HASIL: NEGATIF DIABETES (Risiko Rendah)</div>
+                            <div class="pred-desc">
+                                Berdasarkan data yang dimasukkan, model <b>{selected_model}</b> memprediksi pasien <b>tidak</b> mengidap diabetes. 
+                                {"(Tingkat keyakinan model: {:.1f}%)".format((1-proba)*100) if proba > 0 else ""}<br><br>
+                                <b>Rekomendasi:</b> Pertahankan pola hidup sehat, olahraga teratur, dan cek kesehatan rutin tahunan.
+                            </div>
                         </div>
                         """, unsafe_allow_html=True)
 
-        with tab3:
-            st.write("Statistik Dasar Dataset:")
-            st.dataframe(df_diab.describe())
-            
-    except Exception as e:
-        st.error(f"Terjadi kesalahan saat memuat data/model: {e}")
+        with tab_info:
+            st.subheader("Statistik Deskriptif Dataset")
+            st.dataframe(df_diab.describe().round(2), use_container_width=True)
+            st.markdown("##### Korelasi Antar Fitur")
+            fig_corr, ax_corr = plt.subplots(figsize=(8, 6))
+            sns.heatmap(df_diab.corr(), annot=True, cmap='coolwarm', fmt='.2f', ax=ax_corr)
+            st.pyplot(fig_corr)
 
-# ====================================================
-# HALAMAN 2: CLUSTERING GERAI KOPI
-# ====================================================
-elif page == "2. Clustering Gerai Kopi (K-Means)":
-    st.markdown('<h1 class="main-header">☕ Analisis Sebaran Gerai Kopi</h1>', unsafe_allow_html=True)
-    st.write("Mengelompokkan lokasi gerai kopi menggunakan **K-Means Clustering** untuk identifikasi zona potensial.")
+    except FileNotFoundError as e:
+        st.error(f"❌ File tidak ditemukan: `{e.filename}`. Pastikan file dataset dan model `.pkl` berada di folder yang sama dengan script ini.")
+    except Exception as e:
+        st.error(f"Terjadi kesalahan tak terduga: {e}")
+
+# ==============================================================================
+# 4. HALAMAN 2: CLUSTERING GERAI KOPI
+# ==============================================================================
+elif page == "☕ Clustering Gerai Kopi":
+    st.markdown('<h1 class="main-header">☕ Analisis Sebaran & Zonasi Gerai Kopi</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">Segmentasi lokasi berbasis koordinat geografis menggunakan K-Means untuk identifikasi zona bisnis potensial.</p>', unsafe_allow_html=True)
     
     try:
         df_kopi = pd.read_csv('lokasi_gerai_kopi_clean.csv')
         kmeans = joblib.load('model_kmeans.pkl')
         
-        # Cari nama kolom koordinat secara dinamis
-        col_lat = [c for c in df_kopi.columns if any(k in c.lower() for k in ['lat', 'y', 'lintang'])][0]
-        col_lon = [c for c in df_kopi.columns if any(k in c.lower() for k in ['lon', 'long', 'lng', 'x', 'bujur'])][0]
+        # Deteksi kolom koordinat secara cerdas
+        col_lat = next((c for c in df_kopi.columns if any(k in c.lower() for k in ['lat', 'y', 'lintang'])), df_kopi.columns[0])
+        col_lon = next((c for c in df_kopi.columns if any(k in c.lower() for k in ['lon', 'long', 'lng', 'x', 'bujur'])), df_kopi.columns[1])
         
         X_kopi = df_kopi[[col_lat, col_lon]]
         df_kopi['Cluster'] = kmeans.labels_
-        
-        # --- VISUALISASI UTAMA ---
-        st.subheader("Peta Sebaran Klaster")
-        
-        # Hitung centroid untuk ditampilkan di plot
         centroids = kmeans.cluster_centers_
         
-        fig, ax = plt.subplots(figsize=(10, 6))
-        scatter = sns.scatterplot(
-            data=df_kopi, 
-            x=col_lon, 
-            y=col_lat, 
-            hue='Cluster', 
-            palette='viridis', 
-            s=60, 
-            alpha=0.7,
-            ax=ax
-        )
+        # Layout Utama
+        col_map, col_panel = st.columns([2, 1])
         
-        # Plot Centroids (Titik Pusat Klaster)
-        plt.scatter(centroids[:, 1], centroids[:, 0], s=200, c='red', marker='X', label='Centroid Klaster', edgecolors='black', linewidths=2)
-        
-        plt.title("Sebaran Lokasi Gerai Kopi Berdasarkan Klaster", fontsize=14)
-        plt.xlabel(f"Longitude ({col_lon})")
-        plt.ylabel(f"Latitude ({col_lat})")
-        plt.legend(title="Klaster")
-        plt.grid(True, linestyle='--', alpha=0.3)
-        
-        st.pyplot(fig)
-        
-        st.markdown("---")
-        
-        # --- FITUR CEK LOKASI BARU ---
-        col_check, col_info = st.columns([2, 1])
-        
-        with col_check:
-            st.subheader("🔍 Cek Potensi Lokasi Baru")
-            st.caption("Masukkan koordinat untuk mengetahui klaster dan estimasi keramaian.")
+        with col_map:
+            st.subheader("📍 Peta Sebaran Klaster")
             
-            c1, c2 = st.columns(2)
-            with c1:
-                in_lat = st.number_input(f"Latitude ({col_lat})", value=float(X_kopi[col_lat].mean()), format="%.6f")
-            with c2:
-                in_lon = st.number_input(f"Longitude ({col_lon})", value=float(X_kopi[col_lon].mean()), format="%.6f")
-                
-            if st.button("📌 Analisis Lokasi Ini", type="primary", use_container_width=True):
+            # Styling Plot agar terlihat seperti Dashboard Premium
+            sns.set_theme(style="whitegrid", rc={"grid.linestyle": "--", "grid.alpha": 0.3})
+            fig, ax = plt.subplots(figsize=(10, 6), facecolor='#f8fafc')
+            ax.set_facecolor('#ffffff')
+            
+            # Scatter plot data points
+            scatter = sns.scatterplot(
+                data=df_kopi, x=col_lon, y=col_lat, hue='Cluster', 
+                palette='viridis', s=60, alpha=0.6, edgecolor=None, ax=ax
+            )
+            
+            # Plot Centroids dengan marker yang mencolok
+            ax.scatter(
+                centroids[:, 1], centroids[:, 0], 
+                s=250, c='#ef4444', marker='X', 
+                label='Pusat Klaster (Centroid)', 
+                edgecolors='white', linewidths=2, zorder=5
+            )
+            
+            plt.title("Distribusi Geografis Gerai Kopi", fontsize=14, fontweight='bold', color='#1e293b', pad=15)
+            plt.xlabel(f"Longitude ({col_lon})", fontsize=10, color='#64748b')
+            plt.ylabel(f"Latitude ({col_lat})", fontsize=10, color='#64748b')
+            
+            # Legend kustom
+            legend = ax.legend(title="Klaster", title_fontsize=11, fontsize=10, frameon=True, facecolor='white', edgecolor='#e2e8f0')
+            plt.setp(legend.get_texts(), color='#334155')
+            
+            sns.despine(left=True, bottom=True) # Hapus spine kiri dan bawah untuk tampilan bersih
+            st.pyplot(fig)
+            
+            # Reset theme
+            sns.reset_orig()
+
+        with col_panel:
+            st.subheader("📊 Ringkasan Klaster")
+            
+            # Metric jumlah klaster
+            n_clusters = len(np.unique(kmeans.labels_))
+            st.metric("Total Klaster Terbentuk", n_clusters)
+            
+            # Bar chart distribusi
+            cluster_counts = df_kopi['Cluster'].value_counts().sort_index()
+            st.markdown("##### Distribusi Anggota Klaster")
+            st.bar_chart(cluster_counts, color="#8b5cf6")
+            
+            st.divider()
+            
+            st.subheader("🔍 Simulasi Lokasi Baru")
+            st.caption("Uji koordinat untuk melihat potensi zonanya.")
+            
+            in_lat = st.number_input("Latitude", value=float(X_kopi[col_lat].mean()), format="%.6f")
+            in_lon = st.number_input("Longitude", value=float(X_kopi[col_lon].mean()), format="%.6f")
+            
+            if st.button("Analisis Zona", type="primary", use_container_width=True):
                 pred_cluster = int(kmeans.predict([[in_lat, in_lon]])[0])
                 
-                # Logika Zona (Asumsi: Klaster 0 = Sepi, lainnya = Ramai. Sesuaikan dengan data Anda)
-                # Untuk lebih akurat, hitung jarak ke centroid terdekat atau density
-                is_sepi = (pred_cluster == 0) 
+                # Hitung jarak ke centroid terdekat untuk "skor kepadatan"
+                distances = np.linalg.norm(centroids - [in_lat, in_lon], axis=1)
+                min_dist = np.min(distances)
                 
-                if is_sepi:
-                    st.warning(f"**Klaster {pred_cluster}**: Zona Sepi 📉")
-                    st.markdown("Area ini memiliki kepadatan gerai rendah. Cocok untuk ekspansi jika target pasar spesifik, namun traffic mungkin rendah.")
+                st.markdown(f"**Hasil:** Masuk ke **Klaster {pred_cluster}**")
+                
+                # Logika Bisnis Sederhana (Sesuaikan dengan konteks data Anda)
+                # Asumsi: Klaster dengan anggota paling sedikit = Zona Sepi, atau bisa disesuaikan
+                min_cluster = cluster_counts.idxmin()
+                
+                if pred_cluster == min_cluster or min_dist > (np.max(distances) * 0.8):
+                    st.warning("⚠️ **ZONA SEPI**\n\nKepadatan gerai di area ini rendah. Potensi *foot traffic* alami kecil, namun bisa menjadi peluang *blue ocean* jika ada target pasar spesifik.")
                 else:
-                    st.success(f"**Klaster {pred_cluster}**: Zona Ramai 📈")
-                    st.markdown("Area ini merupakan pusat keramaian. Persaingan tinggi, namun potensi pelanggan juga besar.")
-                
-                # Tampilkan titik baru di peta sementara (opsional, bisa ditambahkan logika plot ulang)
-        
-        with col_info:
-            st.subheader("Info Klaster")
-            n_clusters = len(np.unique(kmeans.labels_))
-            st.metric("Total Klaster", n_clusters)
-            
-            cluster_counts = df_kopi['Cluster'].value_counts().sort_index()
-            st.bar_chart(cluster_counts)
-            
+                    st.success("✅ **ZONA RAMAI / POTENSIAL**\n\nArea ini berada di dekat pusat klaster yang padat. Persaingan tinggi, tetapi validasi pasar sudah terbukti.")
+
+    except FileNotFoundError as e:
+        st.error(f"❌ File tidak ditemukan: `{e.filename}`. Pastikan file dataset dan model `.pkl` tersedia.")
     except Exception as e:
         st.error(f"Terjadi kesalahan pada modul Clustering: {e}")
