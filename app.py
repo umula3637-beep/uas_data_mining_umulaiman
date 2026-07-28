@@ -6,19 +6,21 @@ import plotly.express as px
 import plotly.graph_objects as go
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 from sklearn.model_selection import train_test_split
+from streamlit_folium import st_folium
+import folium
 
 # ====================================================
 # 1. CONFIG HALAMAN
 # ====================================================
 st.set_page_config(
-    page_title="UMUL AIMAN 23146039 - Analytics Dashboard", 
+    page_title="UMUL AIMAN 23146039 - Enterprise Mining Engine", 
     page_icon="✨", 
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # ====================================================
-# 2. CUSTOM CSS - GEMINI GLASSMORPHISM v3.0
+# 2. CUSTOM CSS - ULTRA PREMIUM GEMINI GLASSMORPHISM
 # ====================================================
 st.markdown("""
     <style>
@@ -42,7 +44,6 @@ st.markdown("""
         color: #a8c7fa !important;
     }
 
-    /* Badges & Titles */
     .gemini-badge {
         display: inline-flex;
         align-items: center;
@@ -76,7 +77,6 @@ st.markdown("""
         margin-bottom: 24px;
     }
 
-    /* Glassmorphism Card Container */
     .gemini-card {
         background: rgba(23, 25, 35, 0.65);
         border: 1px solid rgba(255, 255, 255, 0.08);
@@ -87,7 +87,6 @@ st.markdown("""
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }
 
-    /* KPI Cards */
     .kpi-card {
         background: rgba(255, 255, 255, 0.03);
         border: 1px solid rgba(255, 255, 255, 0.08);
@@ -107,13 +106,11 @@ st.markdown("""
         font-weight: 600;
     }
 
-    /* Sidebar Styling */
     [data-testid="stSidebar"] {
         background-color: rgba(13, 14, 21, 0.95) !important;
         border-right: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    /* Status Notifications */
     .status-positive {
         background: linear-gradient(135deg, rgba(234, 67, 53, 0.2) 0%, rgba(154, 0, 0, 0.1) 100%);
         border: 1px solid rgba(242, 184, 181, 0.4);
@@ -133,7 +130,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ====================================================
-# 3. RESOURCE CACHING (Efisensi Performa)
+# 3. RESOURCE CACHING
 # ====================================================
 @st.cache_data
 def load_dataset(filepath):
@@ -161,15 +158,15 @@ with st.sidebar:
     
     page = st.radio(
         "Pilih Halaman:",
-        ["1. Prediksi Diabetes (Klasifikasi)", "2. Clustering Gerai Kopi (K-Means)"],
+        ["1. Prediksi Diabetes (Klasifikasi)", "2. Clustering Gerai Kopi (Geospasial)"],
         label_visibility="collapsed"
     )
     
     st.markdown("---")
     st.markdown("""
         <div style='font-size: 0.75rem; color: #6e727e; text-align: center; line-height: 1.5;'>
-            <b>Gemini Mining Engine v3.0 Pro</b><br>
-            Powered by Scikit-Learn, Plotly & Streamlit
+            <b>Gemini Mining Engine v4.0 Enterprise</b><br>
+            Powered by Scikit-Learn, Folium & Streamlit
         </div>
     """, unsafe_allow_html=True)
 
@@ -178,9 +175,9 @@ with st.sidebar:
 # ====================================================
 if page == "1. Prediksi Diabetes (Klasifikasi)":
     
-    st.markdown('<div class="gemini-badge">🩺 Healthcare Intelligence</div>', unsafe_allow_html=True)
+    st.markdown('<div class="gemini-badge">🩺 Healthcare Intelligence System</div>', unsafe_allow_html=True)
     st.markdown('<div class="gemini-title">Prediksi Risiko Diabetes Pasien</div>', unsafe_allow_html=True)
-    st.markdown('<div class="gemini-subtitle">Sistem pendukung keputusan klinis dengan pemodelan Ensemble Machine Learning secara real-time.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="gemini-subtitle">Sistem pendukung keputusan klinis dengan simulasi tunggal, analisis batch upload, dan explainable AI.</div>', unsafe_allow_html=True)
 
     try:
         df_diab = load_dataset('diabetes.csv')
@@ -188,10 +185,9 @@ if page == "1. Prediksi Diabetes (Klasifikasi)":
         nb = load_ml_model('model_nb.pkl')
         dt = load_ml_model('model_dt.pkl')
     except Exception as e:
-        st.error(f"Gagal memuat dataset atau model. Pastikan file tersimpan di direktori aplikasi. Detail: {e}")
+        st.error(f"Gagal memuat dataset atau model. Pastikan file tersimpan di lokasi proyek. Detail: {e}")
         st.stop()
 
-    # Identifikasi Target
     target_col = next((col for col in df_diab.columns if col.lower().strip() in ['outcome', 'target', 'class', 'diabetes']), df_diab.columns[-1])
     X = df_diab.drop(target_col, axis=1)
     y = df_diab[target_col]
@@ -199,7 +195,7 @@ if page == "1. Prediksi Diabetes (Klasifikasi)":
     
     models = {'KNN': knn, 'Naïve Bayes': nb, 'Decision Tree': dt}
 
-    # High-level KPIs
+    # KPIs
     kpi1, kpi2, kpi3, kpi4 = st.columns(4)
     with kpi1:
         st.markdown(f'<div class="kpi-card"><div class="kpi-value">{len(df_diab)}</div><div class="kpi-label">Total Sampel Data</div></div>', unsafe_allow_html=True)
@@ -213,12 +209,12 @@ if page == "1. Prediksi Diabetes (Klasifikasi)":
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Tabs Layout
-    tab_sim, tab_eval = st.tabs(["📝 Form Simulasi Prediksi", "📊 Evaluasi & Performance Model"])
+    tab_sim, tab_batch, tab_eval = st.tabs(["📝 Input Tunggal", "📁 Batch Prediction (Upload File)", "📊 Analytics & Evaluasi"])
 
+    # TAB 1: INPUT TUNGGAL
     with tab_sim:
         st.markdown('<div class="gemini-card">', unsafe_allow_html=True)
-        st.markdown("### 📝 Input Parameter Fisiologis Pasien")
+        st.markdown("### 📝 Input Parameter Pasien")
         
         selected_model_name = st.selectbox("Algoritma Eksekusi Prediksi:", list(models.keys()), key="pred_select")
         
@@ -240,29 +236,58 @@ if page == "1. Prediksi Diabetes (Klasifikasi)":
             chosen_model = models[selected_model_name]
             prediction = chosen_model.predict([input_values])[0]
             
-            # Probabilitas jika model mendukung predict_proba
-            has_proba = hasattr(chosen_model, "predict_proba")
-            proba_str = ""
-            if has_proba:
-                proba = chosen_model.predict_proba([input_values])[0][prediction] * 100
-                proba_str = f" (Tingkat Keyakinan: {proba:.1f}%)"
-
             if prediction == 1:
-                st.markdown(f"""
+                st.markdown("""
                     <div class="status-positive">
-                        <b style="font-size: 1.05rem;">⚠️ DIAGNOSA: RISIKO DIABETES TERDETEKSI (POSITIF){proba_str}</b><br>
-                        <span style="font-size: 0.85rem; opacity: 0.9;">Pola indikator terdeteksi tinggi. Disarankan pemeriksaan klinis laboratorium lebih lanjut.</span>
+                        <b style="font-size: 1.05rem;">⚠️ DIAGNOSA: RISIKO DIABETES TERDETEKSI (POSITIF)</b><br>
+                        <span style="font-size: 0.85rem; opacity: 0.9;">Pola indikator terdeteksi tinggi. Disarankan pemeriksaan lanjutan.</span>
                     </div>
                 """, unsafe_allow_html=True)
             else:
-                st.markdown(f"""
+                st.markdown("""
                     <div class="status-negative">
-                        <b style="font-size: 1.05rem;">✅ DIAGNOSA: PASIEN DALAM KONDISI SEHAT (NEGATIF){proba_str}</b><br>
-                        <span style="font-size: 0.85rem; opacity: 0.9;">Profil indikator fisiologis pasien berada dalam kisaran ambang batas normal.</span>
+                        <b style="font-size: 1.05rem;">✅ DIAGNOSA: PASIEN DALAM KONDISI SEHAT (NEGATIF)</b><br>
+                        <span style="font-size: 0.85rem; opacity: 0.9;">Profil fisiologis pasien berada dalam batas normal.</span>
                     </div>
                 """, unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
+    # TAB 2: BATCH PREDICTION
+    with tab_batch:
+        st.markdown('<div class="gemini-card">', unsafe_allow_html=True)
+        st.markdown("### 📁 Upload File CSV / Excel untuk Prediksi Massal")
+        st.caption("Unggah dataset tanpa kolom target untuk memproses banyak pasien sekaligus.")
+        
+        uploaded_file = st.file_uploader("Pilih file CSV", type=["csv"])
+        batch_model_name = st.selectbox("Model untuk Batch Processing:", list(models.keys()), key="batch_select")
+        
+        if uploaded_file is not None:
+            batch_df = pd.read_csv(uploaded_file)
+            st.write(" Preview Data Unggahan:", batch_df.head(3))
+            
+            if st.button("🚀 Eksekusi Prediksi Massal"):
+                try:
+                    chosen_batch_model = models[batch_model_name]
+                    preds = chosen_batch_model.predict(batch_df[feature_names])
+                    
+                    batch_df['Hasil_Prediksi'] = ["Positif Diabetes" if p == 1 else "Negatif (Sehat)" for p in preds]
+                    
+                    st.success(" Sukses memproses seluruh data!")
+                    st.dataframe(batch_df)
+                    
+                    # Button Download CSV
+                    csv_data = batch_df.to_csv(index=False).encode('utf-8')
+                    st.download_button(
+                        label="📥 Download Hasil Prediksi (CSV)",
+                        data=csv_data,
+                        file_name="hasil_prediksi_diabetes.csv",
+                        mime="text/csv"
+                    )
+                except Exception as err:
+                    st.error(f"Kolom dalam file tidak sesuai dengan fitur model. Error: {err}")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # TAB 3: EVALUASI & EXPLAINABILITY
     with tab_eval:
         col_left, col_right = st.columns([1.1, 0.9])
         
@@ -280,11 +305,19 @@ if page == "1. Prediksi Diabetes (Klasifikasi)":
                     'F1-Score': f"{f1_score(y_test, y_pred):.2f}"
                 })
             st.dataframe(pd.DataFrame(metrics_list), use_container_width=True, hide_index=True)
+            
+            # Decision Tree Feature Importance
+            if hasattr(dt, 'feature_importances_'):
+                st.markdown("#### 🔍 Feature Importance (Decision Tree)")
+                imp_df = pd.DataFrame({'Fitur': feature_names, 'Tingkat Pengaruh': dt.feature_importances_}).sort_values('Tingkat Pengaruh', ascending=True)
+                fig_imp = px.bar(imp_df, x='Tingkat Pengaruh', y='Fitur', orientation='h', color='Tingkat Pengaruh', color_continuous_scale='Viridis')
+                fig_imp.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="#e3e2e6"), height=250, margin=dict(l=10,r=10,t=10,b=10))
+                st.plotly_chart(fig_imp, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
 
         with col_right:
             st.markdown('<div class="gemini-card">', unsafe_allow_html=True)
-            st.markdown("### 🧩 Confusion Matrix (Interactive)")
+            st.markdown("### 🧩 Confusion Matrix")
             selected_eval_model = st.selectbox("Pilih Model Evaluasi:", list(models.keys()), key="cm_select")
             
             cm = confusion_matrix(y_test, models[selected_eval_model].predict(X_test))
@@ -293,87 +326,77 @@ if page == "1. Prediksi Diabetes (Klasifikasi)":
                 labels=dict(x="Prediksi Model", y="Kondisi Real", color="Jumlah"),
                 x=['Negatif (0)', 'Positif (1)'],
                 y=['Negatif (0)', 'Positif (1)'],
-                color_continuous_scale='Purples'
+                color_continuous_scale='Blues'
             )
-            fig.update_layout(
-                paper_bgcolor='rgba(0,0,0,0)',
-                plot_bgcolor='rgba(0,0,0,0)',
-                font=dict(color="#e3e2e6"),
-                height=280,
-                margin=dict(l=20, r=20, t=20, b=20)
-            )
+            fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="#e3e2e6"), height=300, margin=dict(l=20,r=20,t=20,b=20))
             st.plotly_chart(fig, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
 
 # ====================================================
 # HALAMAN 2: CLUSTERING GERAI KOPI
 # ====================================================
-elif page == "2. Clustering Gerai Kopi (K-Means)":
+elif page == "2. Clustering Gerai Kopi (Geospasial)":
     
-    st.markdown('<div class="gemini-badge">☕ Spatial Intelligence</div>', unsafe_allow_html=True)
+    st.markdown('<div class="gemini-badge">☕ Spatial Intelligence Engine</div>', unsafe_allow_html=True)
     st.markdown('<div class="gemini-title">Klaster Geospasial Gerai Kopi</div>', unsafe_allow_html=True)
-    st.markdown('<div class="gemini-subtitle">Pengelompokan titik lokasi gerai menggunakan Unsupervised Learning K-Means untuk strategi ekspansi.</div>', unsafe_allow_html=True)
+    st.markdown('<div class="gemini-subtitle">Pengelompokan geospasial interaktif berbasis Peta Bumi Nyata (OpenStreetMap Folium).</div>', unsafe_allow_html=True)
     
     try:
         df_kopi = load_dataset('lokasi_gerai_kopi_clean.csv')
         kmeans = load_ml_model('model_kmeans.pkl')
     except Exception as e:
-        st.error(f"Gagal memuat dataset atau model clustering. Detail: {e}")
+        st.error(f"Gagal memuat dataset/model clustering. Detail: {e}")
         st.stop()
 
     col_lat = [c for c in df_kopi.columns if any(k in c.lower() for k in ['lat', 'y', 'lintang'])][0]
     col_lon = [c for c in df_kopi.columns if any(k in c.lower() for k in ['lon', 'long', 'lng', 'x', 'bujur'])][0]
     
     X_kopi = df_kopi[[col_lat, col_lon]]
-    df_kopi['Cluster'] = kmeans.labels_.astype(str)
+    df_kopi['Cluster'] = kmeans.labels_
     
-    col_map, col_form = st.columns([1.2, 0.8])
+    col_map, col_form = st.columns([1.3, 0.7])
     
     with col_map:
         st.markdown('<div class="gemini-card">', unsafe_allow_html=True)
-        st.markdown("### 📍 Visualisasi Interaktif Geospasial")
+        st.markdown("### 🗺️ Peta Bumi Geospasial Interaktif")
         
-        # Plotly Express Scatter Map
-        fig = px.scatter(
-            df_kopi,
-            x=col_lon,
-            y=col_lat,
-            color='Cluster',
-            hover_data=df_kopi.columns,
-            color_discrete_sequence=px.colors.qualitative.Bold,
-            title="Sebaran Titik Lokasi Gerai Kopi"
-        )
+        # Inisialisasi Peta Folium
+        center_lat = df_kopi[col_lat].mean()
+        center_lon = df_kopi[col_lon].mean()
+        m = folium.Map(location=[center_lat, center_lon], zoom_start=12, tiles="CartoDB dark_matter")
         
+        colors = ['#FF4B4B', '#1E88E5', '#00E676', '#FFD600', '#AB47BC']
+        
+        # Plot Titik Gerai
+        for idx, row in df_kopi.iterrows():
+            cluster_id = int(row['Cluster'])
+            folium.CircleMarker(
+                location=[row[col_lat], row[col_lon]],
+                radius=6,
+                color=colors[cluster_id % len(colors)],
+                fill=True,
+                fill_color=colors[cluster_id % len(colors)],
+                fill_opacity=0.7,
+                popup=f"Gerai #{idx} (Klaster {cluster_id})"
+            ).add_to(m)
+            
         # Plot Centroids
-        centroids = kmeans.cluster_centers_
-        fig.add_trace(go.Scatter(
-            x=centroids[:, 1],
-            y=centroids[:, 0],
-            mode='markers',
-            marker=dict(symbol='x', size=12, color='white', line=dict(width=2, color='red')),
-            name='Centroid (Pusat Klaster)'
-        ))
-
-        fig.update_layout(
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(18, 20, 29, 0.8)',
-            font=dict(color="#e3e2e6"),
-            xaxis=dict(gridcolor='#1f2233', title="Longitude"),
-            yaxis=dict(gridcolor='#1f2233', title="Latitude"),
-            legend_title="Klaster",
-            height=450,
-            margin=dict(l=10, r=10, t=40, b=10)
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        for c_idx, c_coord in enumerate(kmeans.cluster_centers_):
+            folium.Marker(
+                location=[c_coord[0], c_coord[1]],
+                popup=f"Pusat Centroid Klaster {c_idx}",
+                icon=folium.Icon(color='white', icon='star', prefix='fa')
+            ).add_to(m)
+            
+        st_folium(m, width="100%", height=450)
         st.markdown('</div>', unsafe_allow_html=True)
         
     with col_form:
         st.markdown('<div class="gemini-card">', unsafe_allow_html=True)
-        st.markdown("### 🔍 Evaluasi Koordinat Baru")
-        st.caption("Uji potensi lokasi baru untuk penempatan cabang:")
+        st.markdown("### 🔍 Evaluasi Titik Lokasi Baru")
         
-        in_lat = st.number_input(f"Latitude ({col_lat})", value=float(X_kopi[col_lat].mean()), format="%.6f")
-        in_lon = st.number_input(f"Longitude ({col_lon})", value=float(X_kopi[col_lon].mean()), format="%.6f")
+        in_lat = st.number_input(f"Latitude ({col_lat})", value=float(center_lat), format="%.6f")
+        in_lon = st.number_input(f"Longitude ({col_lon})", value=float(center_lon), format="%.6f")
             
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("📌 Analisis Karakteristik Zona"):
@@ -389,14 +412,14 @@ elif page == "2. Clustering Gerai Kopi (K-Means)":
                 st.markdown("""
                     <div class="status-positive">
                         <b style="font-size: 1rem;">⚠️ STATUS ZONA: DENSITY RENDAH</b><br>
-                        <span style="font-size: 0.85rem; opacity: 0.85;">Tingkat kompetisi rendah. Area ini membutuhkan strategi pemasaran penetrasi yang lebih kuat.</span>
+                        <span style="font-size: 0.85rem; opacity: 0.85;">Tingkat kompetisi rendah. Area ini membutuhkan strategi penetrasi pasar.</span>
                     </div>
                 """, unsafe_allow_html=True)
             else:
                 st.markdown("""
                     <div class="status-negative">
                         <b style="font-size: 1rem;">✅ STATUS ZONA: DENSITY TINGGI</b><br>
-                        <span style="font-size: 0.85rem; opacity: 0.85;">Konsentrasi gerai tinggi. Menandakan tingkat permintaan dan foot-traffic pasar yang matang.</span>
+                        <span style="font-size: 0.85rem; opacity: 0.85;">Konsentrasi gerai tinggi. Menandakan foot-traffic yang sudah matang.</span>
                     </div>
                 """, unsafe_allow_html=True)
                 
