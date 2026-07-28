@@ -10,7 +10,7 @@ from sklearn.model_selection import train_test_split
 # CONFIG HALAMAN
 # ====================================================
 st.set_page_config(
-    page_title="Gemini AI Analytics Workspace", 
+    page_title="UMUL AIMAN 23146039", 
     page_icon="✨", 
     layout="wide",
     initial_sidebar_state="expanded"
@@ -206,7 +206,7 @@ with st.sidebar:
     st.markdown("""
         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
             <span style="font-size: 1.8rem;">✨</span>
-            <span style="font-weight: 800; font-size: 1.2rem; color: #ffffff; letter-spacing: -0.5px;">GEMINI WORKSPACE</span>
+            <span style="font-weight: 800; font-size: 1.2rem; color: #ffffff; letter-spacing: -0.5px;">UMUL AIMAN 23146039</span>
         </div>
     """, unsafe_allow_html=True)
     
