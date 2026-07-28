@@ -20,7 +20,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS dengan perbaikan icon visibility
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -36,16 +35,12 @@ st.markdown("""
     header {visibility: hidden;}
     .stDecoration {display: none;}
     
-    h1, h2, h3 {
-        color: #111827 !important;
-        font-weight: 600 !important;
-        letter-spacing: -0.025em !important;
-    }
     .main-header {
         font-size: 2rem;
         font-weight: 700;
         color: #111827;
         margin-bottom: 0.25rem;
+        letter-spacing: -0.02em;
     }
     .sub-header {
         font-size: 1.05rem;
@@ -113,7 +108,7 @@ st.markdown("""
         border-right: 1px solid #F3F4F6 !important;
     }
     
-    /* PERBAIKAN ICON DI SIDEBAR - PASTIKAN TERLIHAT */
+    /* Sidebar Menu Button Premium */
     section[data-testid="stSidebar"] .stButton > button {
         width: 100% !important;
         text-align: left !important;
@@ -121,12 +116,13 @@ st.markdown("""
         padding: 12px 16px !important;
         font-size: 0.95rem !important;
         border-radius: 8px !important;
-        margin-bottom: 6px !important;
+        margin-bottom: 8px !important;
         border: 1px solid transparent !important;
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Emoji, sans-serif !important;
+        font-family: 'Inter', sans-serif !important;
         display: flex !important;
         align-items: center !important;
         gap: 10px !important;
+        transition: all 0.2s ease !important;
     }
     
     section[data-testid="stSidebar"] .stButton > button:not([data-testid="baseButton-primary"]) {
@@ -141,16 +137,9 @@ st.markdown("""
     section[data-testid="stSidebar"] .stButton > button[data-testid="baseButton-primary"] {
         background-color: #111827 !important;
         color: #FFFFFF !important;
-        border-color: #E5E7EB !important;
+        border-color: #111827 !important;
         font-weight: 600 !important;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
-    }
-    
-    /* Icon size di sidebar */
-    .sidebar-icon {
-        font-size: 1.2rem !important;
-        margin-right: 8px !important;
-        display: inline-block !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
     }
 
     .stButton > button[kind="primary"] {
@@ -214,13 +203,13 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==============================================================================
-# 2. NAVIGASI SIDEBAR DENGAN ICON YANG JELAS
+# 2. NAVIGASI SIDEBAR (DIPERBAIKI: TANPA st.columns(1))
 # ==============================================================================
 with st.sidebar:
-    # Header dengan icon yang jelas
+    # Header Sidebar
     st.markdown("""
         <div style="padding: 12px 0 24px 0; display: flex; align-items: center; gap: 12px;">
-            <div style="background: linear-gradient(135deg, #111827 0%, #374151 100%); color: white; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: bold;">📊</div>
+            <div style="background: #111827; color: white; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">📊</div>
             <div>
                 <div style="font-size: 1.25rem; font-weight: 700; color: #111827;">DataMining Pro</div>
                 <div style="font-size: 0.75rem; color: #9CA3AF;">Premium Dashboard</div>
@@ -234,22 +223,20 @@ with st.sidebar:
     if "active_page" not in st.session_state:
         st.session_state.active_page = "diabetes"
         
-    # Tombol navigasi dengan icon yang dijamin terlihat
-    col1, col2 = st.columns(1)
-    with col1:
-        btn_diabetes = st.button(
-            "🩺 Prediksi Diabetes", 
-            type="primary" if st.session_state.active_page == "diabetes" else "secondary", 
-            use_container_width=True, 
-            key="nav_diabetes"
-        )
-        
-        btn_kopi = st.button(
-            "☕ Clustering Kopi", 
-            type="primary" if st.session_state.active_page == "kopi" else "secondary", 
-            use_container_width=True, 
-            key="nav_kopi"
-        )
+    # Tombol navigasi (Langsung ditumpuk vertikal, tanpa st.columns)
+    btn_diabetes = st.button(
+        "🩺 Prediksi Diabetes", 
+        type="primary" if st.session_state.active_page == "diabetes" else "secondary", 
+        use_container_width=True, 
+        key="nav_diabetes"
+    )
+    
+    btn_kopi = st.button(
+        "☕ Clustering Kopi", 
+        type="primary" if st.session_state.active_page == "kopi" else "secondary", 
+        use_container_width=True, 
+        key="nav_kopi"
+    )
     
     if btn_diabetes:
         st.session_state.active_page = "diabetes"
@@ -259,13 +246,13 @@ with st.sidebar:
         st.rerun()
         
     st.divider()
-    st.markdown("<p style='font-size: 0.75rem; color: #9CA3AF; line-height: 1.5; margin-top: 24px;'>v2.2<br>Powered by Streamlit</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 0.75rem; color: #9CA3AF; line-height: 1.5; margin-top: 24px;'>v2.3<br>Powered by Streamlit</p>", unsafe_allow_html=True)
 
 # ==============================================================================
 # 3. HALAMAN 1: PREDIKSI DIABETES
 # ==============================================================================
 if st.session_state.active_page == "diabetes":
-    st.markdown('<h1 class="main-header"> Prediksi Risiko Diabetes</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">🩺 Prediksi Risiko Diabetes</h1>', unsafe_allow_html=True)
     st.markdown('<p class="sub-header">Evaluasi risiko berdasarkan 8 indikator kesehatan utama menggunakan ensemble model machine learning.</p>', unsafe_allow_html=True)
     
     try:
@@ -280,10 +267,10 @@ if st.session_state.active_page == "diabetes":
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
         
         models = {'KNN': knn, 'Naïve Bayes': nb, 'Decision Tree': dt}
-        tab_eval, tab_pred, tab_info = st.tabs([" Evaluasi Model", "🔮 Prediksi Pasien", "📖 Info Dataset"])
+        tab_eval, tab_pred, tab_info = st.tabs(["📊 Evaluasi Model", "🔮 Prediksi Pasien", "📖 Info Dataset"])
         
         with tab_eval:
-            st.markdown("<div class='section-label'> Performa Algoritma</div>", unsafe_allow_html=True)
+            st.markdown("<div class='section-label'>Performa Algoritma</div>", unsafe_allow_html=True)
             
             metrics_data = []
             cm_dict = {}
@@ -340,7 +327,7 @@ if st.session_state.active_page == "diabetes":
                 inp_age = st.slider("🎂 Usia (Tahun)", 10, 100, int(X['Age'].median()))
             with col2:
                 inp_bmi = st.slider("⚖️ BMI", 0.0, 70.0, float(X['BMI'].median()), 0.1)
-                inp_glucose = st.slider(" Glukosa (mg/dL)", 0, 200, int(X['Glucose'].median()))
+                inp_glucose = st.slider("🩸 Glukosa (mg/dL)", 0, 200, int(X['Glucose'].median()))
             with col3:
                 inp_bp = st.slider("💓 Tekanan Darah", 0, 150, int(X['BloodPressure'].median()))
                 inp_skin = st.slider("📏 Ketebalan Kulit", 0, 100, int(X['SkinThickness'].median()))
@@ -374,7 +361,7 @@ if st.session_state.active_page == "diabetes":
                                     <div class="custom-progress-fill" style="width: {confidence_pct}%; background-color: {bar_color};"></div>
                                 </div>
                                 <div style="text-align: right; font-size: 0.8rem; color: #9CA3AF;">{confidence_pct:.1f}%</div>
-                                <br><b>Rekomendasi:</b> Segera konsultasi dokter.
+                                <br><b>Rekomendasi:</b> Segera konsultasi dokter untuk tes HbA1c.
                             </div>
                         </div>
                         """, unsafe_allow_html=True)
@@ -389,26 +376,26 @@ if st.session_state.active_page == "diabetes":
                                     <div class="custom-progress-fill" style="width: {confidence_pct}%; background-color: {bar_color};"></div>
                                 </div>
                                 <div style="text-align: right; font-size: 0.8rem; color: #9CA3AF;">{confidence_pct:.1f}%</div>
-                                <br><b>Rekomendasi:</b> Pertahankan pola hidup sehat.
+                                <br><b>Rekomendasi:</b> Pertahankan pola hidup sehat dan olahraga teratur.
                             </div>
                         </div>
                         """, unsafe_allow_html=True)
 
         with tab_info:
-            st.markdown("<div class='section-label'> Statistik Dataset</div>", unsafe_allow_html=True)
+            st.markdown("<div class='section-label'>📊 Statistik Dataset</div>", unsafe_allow_html=True)
             st.dataframe(df_diab.describe().round(2), use_container_width=True, height=250)
 
     except FileNotFoundError as e:
-        st.error(f"❌ File tidak ditemukan: `{e.filename}`")
+        st.error(f"❌ File tidak ditemukan: `{e.filename}`. Pastikan file dataset dan model `.pkl` ada di folder yang sama.")
     except Exception as e:
-        st.error(f"❌ Error: {e}")
+        st.error(f"❌ Terjadi kesalahan: {e}")
 
 # ==============================================================================
 # 4. HALAMAN 2: CLUSTERING GERAI KOPI
 # ==============================================================================
 elif st.session_state.active_page == "kopi":
     st.markdown('<h1 class="main-header">☕ Clustering Gerai Kopi</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="sub-header">Segmentasi lokasi berbasis koordinat geografis menggunakan K-Means.</p>', unsafe_allow_html=True)
+    st.markdown('<p class="sub-header">Segmentasi lokasi berbasis koordinat geografis menggunakan K-Means untuk identifikasi zona bisnis potensial.</p>', unsafe_allow_html=True)
     
     try:
         df_kopi = pd.read_csv('lokasi_gerai_kopi_clean.csv')
@@ -421,26 +408,71 @@ elif st.session_state.active_page == "kopi":
         df_kopi['Cluster'] = kmeans.labels_
         centroids = kmeans.cluster_centers_
         
-        st.markdown("<div class='clean-card'>", unsafe_allow_html=True)
-        st.markdown("<div class='section-label'>📍 Peta Sebaran</div>", unsafe_allow_html=True)
+        col_map, col_panel = st.columns([2.5, 1])
         
-        sns.set_theme(style="white")
-        fig, ax = plt.subplots(figsize=(10, 6))
-        
-        sns.scatterplot(
-            data=df_kopi, x=col_lon, y=col_lat, hue='Cluster', 
-            palette='Greys', s=40, alpha=0.6, edgecolor='#FFFFFF', ax=ax, legend=False
-        )
-        
-        ax.scatter(centroids[:, 1], centroids[:, 0], s=120, c='#111827', marker='X', 
-                   edgecolors='#FFFFFF', linewidths=2, zorder=5)
-        
-        ax.set_title("Distribusi Geografis Gerai Kopi", fontsize=13, fontweight='600', pad=15)
-        st.pyplot(fig)
-        st.markdown("</div>", unsafe_allow_html=True)
-        sns.reset_orig()
+        with col_map:
+            st.markdown("<div class='clean-card'>", unsafe_allow_html=True)
+            st.markdown("<div class='section-label'>📍 Peta Sebaran Klaster</div>", unsafe_allow_html=True)
+            
+            sns.set_theme(style="white")
+            fig, ax = plt.subplots(figsize=(10, 6))
+            
+            sns.scatterplot(
+                data=df_kopi, x=col_lon, y=col_lat, hue='Cluster', 
+                palette='Greys', s=40, alpha=0.6, edgecolor='#FFFFFF', ax=ax, legend=False
+            )
+            
+            ax.scatter(centroids[:, 1], centroids[:, 0], s=120, c='#111827', marker='X', 
+                       edgecolors='#FFFFFF', linewidths=2, zorder=5)
+            
+            ax.set_title("Distribusi Geografis Gerai Kopi", fontsize=13, fontweight='600', pad=15)
+            ax.set_xlabel("Longitude", fontsize=9, color='#6B7280')
+            ax.set_ylabel("Latitude", fontsize=9, color='#6B7280')
+            ax.grid(True, linestyle='--', alpha=0.3, color='#E5E7EB')
+            for spine in ax.spines.values():
+                spine.set_color('#F3F4F6')
+                
+            st.pyplot(fig)
+            st.markdown("</div>", unsafe_allow_html=True)
+            sns.reset_orig()
+
+        with col_panel:
+            st.markdown("<div class='clean-card'>", unsafe_allow_html=True)
+            st.markdown("<div class='section-label'>📊 Ringkasan Klaster</div>", unsafe_allow_html=True)
+            
+            n_clusters = len(np.unique(kmeans.labels_))
+            st.metric("Total Klaster", n_clusters)
+            
+            cluster_counts = df_kopi['Cluster'].value_counts().sort_index()
+            st.markdown("<div style='font-size: 0.85rem; color: #6B7280; margin-top: 16px; margin-bottom: 8px;'>Distribusi Anggota</div>", unsafe_allow_html=True)
+            st.bar_chart(cluster_counts, color="#111827", height=150)
+            st.markdown("</div>", unsafe_allow_html=True)
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("<div class='clean-card'>", unsafe_allow_html=True)
+            st.markdown("<div class='section-label'>🔍 Simulasi Lokasi Baru</div>", unsafe_allow_html=True)
+            
+            in_lat = st.number_input("Latitude", value=float(X_kopi[col_lat].mean()), format="%.6f", label_visibility="collapsed")
+            in_lon = st.number_input("Longitude", value=float(X_kopi[col_lon].mean()), format="%.6f", label_visibility="collapsed")
+            
+            if st.button("Analisis Zona", type="primary", use_container_width=True):
+                pred_cluster = int(kmeans.predict([[in_lat, in_lon]])[0])
+                distances = np.linalg.norm(centroids - [in_lat, in_lon], axis=1)
+                min_dist = np.min(distances)
+                max_dist = np.max(distances)
+                
+                min_cluster = cluster_counts.idxmin()
+                
+                st.markdown(f"<div style='text-align: center; padding: 12px; background: #F9FAFB; border-radius: 8px; margin-bottom: 12px;'><span style='font-size: 0.85rem; color: #6B7280;'>Hasil Zonasi:</span><br><b style='font-size: 1.1rem; color: #111827;'>Klaster {pred_cluster}</b></div>", unsafe_allow_html=True)
+                
+                if pred_cluster == min_cluster or min_dist > (max_dist * 0.7):
+                    st.markdown("<div style='padding: 12px; background: #FFFBEB; border: 1px solid #FEF3C7; border-radius: 8px; font-size: 0.9rem; color: #92400E;'>⚠️ <b>Zona Sepi</b><br><span style='font-size: 0.85rem; color: #A16207;'>Kepadatan rendah. Potensi *blue ocean*.</span></div>", unsafe_allow_html=True)
+                else:
+                    st.markdown("<div style='padding: 12px; background: #F0FDF4; border: 1px solid #DCFCE7; border-radius: 8px; font-size: 0.9rem; color: #166534;'>✅ <b>Zona Potensial</b><br><span style='font-size: 0.85rem; color: #15803D;'>Dekat pusat klaster padat. Validasi pasar terbukti.</span></div>", unsafe_allow_html=True)
+            
+            st.markdown("</div>", unsafe_allow_html=True)
 
     except FileNotFoundError as e:
-        st.error(f"❌ File tidak ditemukan: `{e.filename}`")
+        st.error(f"❌ File tidak ditemukan: `{e.filename}`. Pastikan file dataset dan model `.pkl` ada di folder yang sama.")
     except Exception as e:
-        st.error(f" Error: {e}")
+        st.error(f"❌ Terjadi kesalahan: {e}")
