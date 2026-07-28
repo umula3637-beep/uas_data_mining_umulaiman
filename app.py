@@ -33,10 +33,19 @@ st.markdown("""
         color: #e3e2e6;
     }
 
-    /* Hide Streamlit Default Header Elements */
-    #MainMenu {visibility: hidden;}
+    /* Sembunyikan Footer & Watermark Saja (Header tetap aktif untuk tombol sidebar) */
     footer {visibility: hidden;}
-    header {visibility: hidden;}
+    #MainMenu {visibility: hidden;}
+
+    /* Modifikasi Header Streamlit agar transparan & pas dengan tema gelap */
+    [data-testid="stHeader"] {
+        background-color: rgba(13, 14, 21, 0.0) !important;
+    }
+    
+    /* Warna tombol toggle sidebar (hamburger/panah) */
+    [data-testid="stHeader"] button {
+        color: #a8c7fa !important;
+    }
 
     /* Premium Gemini Badge */
     .gemini-badge {
@@ -97,6 +106,15 @@ st.markdown("""
     [data-testid="stSidebar"] {
         background-color: rgba(13, 14, 21, 0.95) !important;
         border-right: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Custom Radio Navigation di Sidebar */
+    div[data-testid="stRadio"] > label {
+        display: none;
+    }
+    
+    div[data-testid="stRadio"] > div {
+        gap: 8px;
     }
 
     /* Inputs Styling */
@@ -192,12 +210,12 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
     
-    st.caption("PILIH MODUL ANALISIS")
+    st.markdown("<p style='font-size: 0.75rem; color: #a8c7fa; font-weight: 700; letter-spacing: 1px;'>PILIH MODUL ANALISIS</p>", unsafe_allow_html=True)
     
     page = st.radio(
-        "",
+        "Pilih Halaman:",
         ["1. Prediksi Diabetes (Klasifikasi)", "2. Clustering Gerai Kopi (K-Means)"],
-        label_visibility="collapsed"
+        key="navigation_radio"
     )
     
     st.markdown("---")
