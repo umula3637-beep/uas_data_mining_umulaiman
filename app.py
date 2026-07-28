@@ -111,6 +111,7 @@ st.markdown("""
         border-right: 1px solid rgba(255, 255, 255, 0.05);
     }
 
+    /* Status Khusus Diagnosa Medis */
     .status-positive {
         background: linear-gradient(135deg, rgba(234, 67, 53, 0.2) 0%, rgba(154, 0, 0, 0.1) 100%);
         border: 1px solid rgba(242, 184, 181, 0.4);
@@ -255,7 +256,7 @@ if page == "1. Prediksi Diabetes (Klasifikasi)":
     # TAB 2: BATCH PREDICTION
     with tab_batch:
         st.markdown('<div class="gemini-card">', unsafe_allow_html=True)
-        st.markdown("### 📁 Upload File CSV / Excel untuk Prediksi Massal")
+        st.markdown("### 📁 Upload File CSV untuk Prediksi Massal")
         st.caption("Unggah dataset tanpa kolom target untuk memproses banyak pasien sekaligus.")
         
         uploaded_file = st.file_uploader("Pilih file CSV", type=["csv"])
@@ -403,23 +404,23 @@ elif page == "2. Clustering Gerai Kopi (Geospasial)":
             pred_cluster = kmeans.predict([[in_lat, in_lon]])[0]
             
             st.markdown(f"""
-                <div style="background: rgba(168, 199, 250, 0.08); padding: 14px; border-radius: 12px; margin-bottom: 16px; border: 1px solid rgba(168, 199, 250, 0.2); font-weight: 600; color: #a8c7fa;">
+                <div style="background: rgba(168, 199, 250, 0.1); padding: 14px; border-radius: 12px; margin-bottom: 16px; border: 1px solid rgba(168, 199, 250, 0.3); font-weight: 600; color: #a8c7fa;">
                     📌 Hasil Pemetaan: Tergolong dalam <b>Klaster {pred_cluster}</b>
                 </div>
             """, unsafe_allow_html=True)
             
             if pred_cluster == 0:
                 st.markdown("""
-                    <div class="status-positive">
-                        <b style="font-size: 1rem;">⚠️ STATUS ZONA: DENSITY RENDAH</b><br>
-                        <span style="font-size: 0.85rem; opacity: 0.85;">Tingkat kompetisi rendah. Area ini membutuhkan strategi penetrasi pasar.</span>
+                    <div style="background: rgba(255, 180, 0, 0.15); border: 1px solid rgba(255, 180, 0, 0.4); color: #ffda79; padding: 18px; border-radius: 14px;">
+                        <b style="font-size: 1rem;">📍 ZONA KELOMPOK 0: KEPADATAN RENDAH</b><br>
+                        <span style="font-size: 0.85rem; opacity: 0.9;">Tingkat kompetisi antar-gerai masih rendah. Sangat cocok untuk ekspansi pasar baru (Blue Ocean Strategy).</span>
                     </div>
                 """, unsafe_allow_html=True)
             else:
                 st.markdown("""
-                    <div class="status-negative">
-                        <b style="font-size: 1rem;">✅ STATUS ZONA: DENSITY TINGGI</b><br>
-                        <span style="font-size: 0.85rem; opacity: 0.85;">Konsentrasi gerai tinggi. Menandakan foot-traffic yang sudah matang.</span>
+                    <div style="background: rgba(66, 133, 244, 0.15); border: 1px solid rgba(66, 133, 244, 0.4); color: #a8c7fa; padding: 18px; border-radius: 14px;">
+                        <b style="font-size: 1rem;">🏢 ZONA KELOMPOK 1: KEPADATAN TINGGI (PASAR MATANG)</b><br>
+                        <span style="font-size: 0.85rem; opacity: 0.9;">Tingkat konsentrasi outlet tinggi. Menandakan potensi foot-traffic dan permintaan konsumen yang sudah terbukti besar.</span>
                     </div>
                 """, unsafe_allow_html=True)
                 
