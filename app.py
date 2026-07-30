@@ -10,87 +10,90 @@ from streamlit_folium import st_folium
 import folium
 
 # =========================
-# Style CSS untuk tampilan menarik
+# Style CSS Super Premium
 # =========================
 st.markdown("""
     <style>
         /* Reset dan font */
         html, body, [class*="css"] {
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+            font-family: 'Poppins', 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
             line-height: 1.6;
         }
 
-        /* Background Halaman */
+        /* Background Halaman - Elegant Gradient */
         .stApp {
             background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            color: #f1f5f9;
+            color: #f8f9fa;
+            padding: 20px;
         }
 
-        /* Card Umum */
+        /* Card Super Premium */
         .card {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            background: #1f2937;
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
             transition: all 0.3s ease;
         }
         .card:hover {
-            box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
             transform: translateY(-4px);
         }
 
-        /* Badge */
+        /* Badge Premium */
         .badge {
             display: inline-block;
-            padding: 8px 16px;
+            padding: 10px 20px;
             border-radius: 50px;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
             color: #fff;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
         }
 
         /* Judul Utama */
         .main-title {
-            font-size: 3rem;
+            font-size: 3.5rem;
             font-weight: 900;
-            background: linear-gradient(135deg, #fdba74, #fca5a5);
+            background: linear-gradient(135deg, #fcbf49, #e7790f);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            letter-spacing: -1px;
-            margin-bottom: 12px;
+            letter-spacing: -1.2px;
+            margin-bottom: 16px;
         }
 
         /* Subtitle */
         .subtitle {
-            font-size: 1.1rem;
-            color: #94a3b8;
-            margin-bottom: 24px;
+            font-size: 1.2rem;
+            color: #9ca3af;
+            margin-bottom: 30px;
         }
 
         /* KPI Box */
         .kpi-box {
-            background: rgba(255,255,255,0.07);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            background: linear-gradient(135deg, #374151, #111827);
+            padding: 22px;
+            border-radius: 20px;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+            text-align: center;
             transition: all 0.3s ease;
         }
         .kpi-box:hover {
-            background: rgba(255,255,255,0.15);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.5);
+            transform: translateY(-2px);
         }
         .kpi-value {
-            font-size: 2.2rem;
-            font-weight: 800;
-            color: #f8fafc;
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #f0f4f8;
+            margin-bottom: 8px;
         }
         .kpi-label {
-            font-size: 0.72rem;
-            color: #94a3b8;
-            letter-spacing: 0.5px;
-            margin-top: 4px;
+            font-size: 0.7rem;
+            color: #9ca3af;
+            letter-spacing: 1px;
             font-weight: 600;
         }
 
@@ -98,89 +101,91 @@ st.markdown("""
         .info-box {
             display: flex;
             align-items: flex-start;
-            gap: 16px;
-            padding: 16px;
-            border-radius: 14px;
-            border: 2px solid transparent;
+            gap: 20px;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid transparent;
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.1);
             transition: all 0.3s ease;
         }
         .info-positive {
-            background-color: rgba(134, 239, 172, 0.1);
+            background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(21,128,61,0.1));
             border-color: #86efac;
         }
         .info-negative {
-            background-color: rgba(252, 165, 165, 0.1);
+            background: linear-gradient(135deg, rgba(239,68,68,0.1), rgba(128,0,0,0.1));
             border-color: #fca5a5;
         }
         .info-box:hover {
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
         }
         .icon {
-            font-size: 1.6rem;
+            font-size: 2rem;
             margin-top: 4px;
         }
         .info-text {
             font-size: 0.88rem;
-            color: #f1f5f9;
+            color: #e0e0e0;
         }
         .info-title {
             font-weight: 700;
             font-size: 1.1rem;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+            color: #f8f9fa;
         }
 
-        /* Button Hover Effect */
+        /* Buttons & Hover Effects */
         .stButton > button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.6);
         }
 
-        /* Tabs dan Sidebar */
+        /* Tabs & Sidebar Styling */
         .stTabs [data-baseweb="tab-list"] {
             gap: 8px;
-            background-color: rgba(15, 23, 42, 0.5);
-            padding: 6px;
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .stTabs [data-baseweb="tab"] {
-            height: 42px;
-            border-radius: 10px;
-            color: #94a3b8;
-            font-weight: 600;
-            font-size: 0.88rem;
-            border: none !important;
-        }
-
-        .stTabs [aria-selected="true"] {
-            background-color: rgba(59, 130, 246, 0.2) !important;
-            color: #a8c7fa !important;
-            border: 1px solid rgba(168, 199, 250, 0.3) !important;
-        }
-
-        [data-testid="stSidebar"] {
-            background-color: rgba(10, 15, 29, 0.95) !important;
-            border-right: 1px solid rgba(255, 255, 255, 0.06);
-        }
-
-        /* Status Medical */
-        .status-positive {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(153, 27, 27, 0.1) 100%);
-            border: 1px solid rgba(248, 113, 113, 0.3);
-            color: #fca5a5;
-            padding: 20px;
+            background-color: rgba(31, 41, 55, 0.6);
+            padding: 8px 12px;
             border-radius: 16px;
-            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.1);
+            border: none;
+        }
+        .stTabs [data-baseweb="tab"] {
+            height: 44px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.91rem;
+            color: #9ca3af;
+            border: none;
+        }
+        .stTabs [aria-selected="true"] {
+            background-color: rgba(99, 102, 241, 0.2) !important;
+            color: #f0f4f8 !important;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Sidebar */
+        [data-testid="stSidebar"] {
+            background-color: rgba(17, 24, 39, 0.95) !important;
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Status Medical - Premium */
+        .status-positive {
+            background: linear-gradient(135deg, rgba(34,197,94,0.2), rgba(21,128,61,0.2));
+            border: 1px solid #86efac;
+            color: #16a34a;
+            padding: 22px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(22, 163, 74, 0.4);
         }
 
         .status-negative {
-            background: linear-gradient(135deg, rgba(34, 197, 94, 0.15) 0%, rgba(20, 83, 45, 0.1) 100%);
-            border: 1px solid rgba(74, 222, 128, 0.3);
-            color: #86efac;
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 8px 20px rgba(34, 197, 94, 0.1);
+            background: linear-gradient(135deg, rgba(239,68,68,0.2), rgba(128,0,0,0.2));
+            border: 1px solid #fca5a5;
+            color: #dc2626;
+            padding: 22px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(207, 70, 78, 0.4);
         }
     </style>
 """, unsafe_allow_html=True)
@@ -202,16 +207,16 @@ def load_ml_model(filepath):
 with st.sidebar:
     st.markdown("""
         <div style="display: flex; align-items: center; gap: 14px; padding: 12px 4px; margin-bottom: 24px;">
-            <div style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);">
-                <span style="font-size: 1.4rem;">✨</span>
+            <div style="background: linear-gradient(135deg, #6366f1, #8b5cf6); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);">
+                <span style="font-size: 1.8rem;">✨</span>
             </div>
             <div>
-                <div style="font-weight: 800; font-size: 1.05rem; color: #f8fafc; letter-spacing: -0.3px;">UMUL AIMAN</div>
+                <div style="font-weight: 800; font-size: 1.05rem; color: #f8fafc; letter-spacing: -0.2px;">UMUL AIMAN</div>
                 <div style="font-size: 0.75rem; color: #a8c7fa; font-weight: 600;">NIM: 23146039</div>
             </div>
         </div>
     """, unsafe_allow_html=True)
-    st.markdown("<p style='font-size: 0.72rem; color: #64748b; font-weight: 800; letter-spacing: 1px; margin-bottom: 12px;'>MODUL SISTEM</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 0.72rem; color: #94a3b8; font-weight: 800; letter-spacing: 1px;'>MODUL SISTEM</p>", unsafe_allow_html=True)
 
     page = st.radio(
         "Pilih Halaman:",
@@ -378,7 +383,7 @@ if page == "1. Prediksi Diabetes (Klasifikasi)":
             if hasattr(dt, 'feature_importances_'):
                 st.markdown("<br>#### 🔍 Relative Feature Importance (Decision Tree)", unsafe_allow_html=True)
                 imp_df = pd.DataFrame({'Fitur': feature_names, 'Pengaruh': dt.feature_importances_}).sort_values('Pengaruh', ascending=True)
-                fig_imp = px.bar(imp_df, x='Pengaruh', y='Fitur', orientation='h', color='Pengaruh', color_continuous_scale='Blues')
+                fig_imp = px.bar(imp_df, x='Pengaruh', y='Fitur', orientation='h', color='Pengaruh', color_continuous_scale='Viridis')
                 fig_imp.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="#94a3b8"), height=260, margin=dict(l=10,r=10,t=10,b=10))
                 st.plotly_chart(fig_imp, use_container_width=True)
             st.markdown('</div>', unsafe_allow_html=True)
@@ -455,31 +460,31 @@ elif page == "2. Clustering Gerai Kopi (Geospasial)":
 
     with col_form:
         st.markdown('<div class="card">', unsafe_allow_html=True)
-        st.markdown("### 🔍 Evaluasi Lokasi Baru")
-        st.caption("Uji koordinat lokasi rencana outlet baru untuk memprediksi karakteristik zona.")
+        st.markdown("### 🔍 Analisis Karakteristik Zona")
+        st.caption("Uji koordinat lokasi rencana outlet baru untuk prediksi klaster.")
         st.markdown("<br>", unsafe_allow_html=True)
         in_lat = st.number_input(f"Latitude ({col_lat})", value=float(center_lat), format="%.6f")
         in_lon = st.number_input(f"Longitude ({col_lon})", value=float(center_lon), format="%.6f")
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("📌 Analisis Karakteristik Zona"):
+        if st.button("📌 Analisis Zona Baru"):
             pred_cluster = kmeans.predict([[in_lat, in_lon]])[0]
             st.markdown(f"""
-                <div style="background: rgba(168, 199, 250, 0.1); padding: 14px 18px; border-radius: 12px; margin-bottom: 20px; border: 1px solid rgba(168, 199, 250, 0.3); font-weight: 600; color: #a8c7fa;">
+                <div style="background: rgba(99, 102, 241, 0.15); padding: 16px 20px; border-radius: 16px; margin-bottom: 20px; border: 1px solid rgba(99, 102, 241, 0.3); font-weight: 600; color: #f0f4f8;">
                     📌 Hasil Pemetaan: Tergolong dalam <b>Klaster {pred_cluster}</b>
                 </div>
             """, unsafe_allow_html=True)
             if pred_cluster == 0:
                 st.markdown("""
-                    <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3); color: #fde68a; padding: 18px; border-radius: 14px;">
-                        <b style="font-size: 1rem;">📍 ZONA KEPADATAN RENDAH (BLUE OCEAN)</b><br>
-                        <span style="font-size: 0.85rem; opacity: 0.9;">Tingkat kompetisi antar-gerai rendah. Sangat potensial untuk ekspansi dan penguasaan pangsa pasar baru.</span>
+                    <div style="background: linear-gradient(135deg, #3b82f6, #60a5fa); padding: 20px; border-radius: 16px; box-shadow: 0 20px 40px rgba(59, 130, 246, 0.4); color: #dbeafe;">
+                        <b style="font-size: 1.1rem;">📍 Zona Kerapatan Rendah (Blue Ocean)</b>
+                        <br><span style="font-size: 0.9rem;">Ruang pasar yang luas dan kompetisi minim, cocok untuk ekspansi baru.</span>
                     </div>
                 """, unsafe_allow_html=True)
             else:
                 st.markdown("""
-                    <div style="background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); color: #bfdbfe; padding: 18px; border-radius: 14px;">
-                        <b style="font-size: 1rem;">🏢 ZONA KEPADATAN TINGGI (RED OCEAN)</b><br>
-                        <span style="font-size: 0.85rem; opacity: 0.9;">Konsentrasi outlet tinggi. Menandakan basis konsumen yang terbukti besar namun dengan kompetisi ketat.</span>
+                    <div style="background: linear-gradient(135deg, #ef4444, #dc2626); padding: 20px; border-radius: 16px; box-shadow: 0 20px 40px rgba(239, 68, 68, 0.4); color: #fde2e2;">
+                        <b style="font-size: 1.1rem;">🏢 Zona Kepadatan Tinggi (Red Ocean)</b>
+                        <br><span style="font-size: 0.9rem;">Pasar yang sudah padat dan kompetitif, perlu strategi khusus untuk bertahan.</span>
                     </div>
                 """, unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
