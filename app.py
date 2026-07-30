@@ -8,6 +8,7 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from sklearn.model_selection import train_test_split
 from streamlit_folium import st_folium
 import folium
+from folium.plugins import HeatMap, MarkerCluster
 
 # ====================================================
 # 1. PAGE CONFIGURATION
@@ -424,13 +425,13 @@ if page == "1. Prediksi Diabetes (Klasifikasi)":
             st.markdown('</div>', unsafe_allow_html=True)
 
 # ====================================================
-# MODUL 2: CLUSTERING GERAI KOPI
+# MODUL 2: CLUSTERING GERAI KOPI (GEOSPASIAL ULTRA)
 # ====================================================
 elif page == "2. Clustering Gerai Kopi (Geospasial)":
     
     st.markdown('<div class="gemini-badge">☕ Spatial Intelligence Engine</div>', unsafe_allow_html=True)
     st.markdown('<div class="gemini-title">Klaster Geospasial Gerai Kopi</div>', unsafe_allow_html=True)
-    st.markdown('<div class="gemini-subtitle">Segmentasi wilayah bisnis berbasis geospasial interaktif (CartoDB Dark Matter).</div>', unsafe_allow_html=True)
+    st.markdown('<div class="gemini-subtitle">Pemetaan konsentrasi bisnis dan segmentasi wilayah berbasis Heatmap & Clustering interaktif.</div>', unsafe_allow_html=True)
     
     try:
         df_kopi = load_dataset('lokasi_gerai_kopi_clean.csv')
@@ -451,44 +452,87 @@ elif page == "2. Clustering Gerai Kopi (Geospasial)":
     X_kopi = df_kopi[[col_lat, col_lon]]
     df_kopi['Cluster'] = kmeans.labels_
     
+    name_candidates = [c for c in df_kopi.columns if any(k in c.lower() for k in ['nama', 'name', 'gerai', 'outlet', 'store'])]
+    col_name = name_candidates[0] if name_candidates else None
+    
     col_map, col_form = st.columns([1.3, 0.7])
     
     with col_map:
         st.markdown('<div class="gemini-card">', unsafe_allow_html=True)
-        st.markdown("### 🗺️ Peta Interaktif Sebaran Klaster")
         
+        m_top_l, m_top_r = st.columns([1, 1])
+        with m_top_l:
+            st.markdown("### 🗺️ Peta Sebaran Ultramodern")
+        with m_top_r:
+            map_view = st.radio("Mode Tampilan Layer:", ["Cluster Markers", "Heatmap Density", "Grouped Clusters"], horizontal=True, label_visibility="collapsed")
+
         center_lat = df_kopi[col_lat].mean()
         center_lon = df_kopi[col_lon].mean()
+        
+        # Peta CartoDB Dark Matter
         m = folium.Map(location=[center_lat, center_lon], zoom_start=12, tiles="CartoDB dark_matter")
         
-        colors = ['#FF4B4B', '#1E88E5', '#00E676', '#FFD600', '#AB47BC']
+        # Palet Warna Neon
+        cluster_colors = ['#00E676', '#FF2A6D', '#05D5E7', '#FFD600', '#DDA0DD']
         
-        for idx, row in df_kopi.iterrows():
-            cluster_id = int(row['Cluster'])
-            folium.CircleMarker(
-                location=[row[col_lat], row[col_lon]],
-                radius=6,
-                color=colors[cluster_id % len(colors)],
-                fill=True,
-                fill_color=colors[cluster_id % len(colors)],
-                fill_opacity=0.8,
-                popup=f"Gerai #{idx} (Klaster {cluster_id})"
-            ).add_to(m)
-            
+        if map_view == "Heatmap Density":
+            heat_data = [[row[col_lat], row[col_lon]] for _, row in df_kopi.iterrows()]
+            HeatMap(heat_data, radius=18, blur=15, min_opacity=0.4, gradient={0.2: '#05D5E7', 0.5: '#00E676', 0.8: '#FFD600', 1.0: '#FF2A6D'}).add_to(m)
+        elif map_view == "Grouped Clusters":
+            marker_cluster = MarkerCluster().add_to(m)
+            for idx, row in df_kopi.iterrows():
+                c_id = int(row['Cluster'])
+                c_color = cluster_colors[c_id % len(cluster_colors)]
+                g_name = row[col_name] if col_name else f"Gerai Kopi #{idx+1}"
+                
+                folium.Marker(
+                    location=[row[col_lat], row[col_lon]],
+                    popup=f"<b>{g_name}</b><br>Klaster: {c_id}",
+                    icon=folium.Icon(color='blue', icon='coffee', prefix='fa')
+                ).add_to(marker_cluster)
+        else:
+            for idx, row in df_kopi.iterrows():
+                c_id = int(row['Cluster'])
+                c_color = cluster_colors[c_id % len(cluster_colors)]
+                g_name = row[col_name] if col_name else f"Gerai Kopi #{idx+1}"
+                
+                popup_html = f"""
+                <div style="font-family: 'Plus Jakarta Sans', sans-serif; padding: 6px; width: 170px; color: #0f172a;">
+                    <div style="font-size: 0.7rem; font-weight: 800; color: {c_color}; text-transform: uppercase; letter-spacing: 0.5px;">KLASTER {c_id}</div>
+                    <div style="font-size: 0.95rem; font-weight: 700; margin: 2px 0 6px 0;">{g_name}</div>
+                    <div style="font-size: 0.75rem; color: #475569;">
+                        <b>Lat:</b> {row[col_lat]:.4f}<br>
+                        <b>Lon:</b> {row[col_lon]:.4f}
+                    </div>
+                </div>
+                """
+                
+                folium.CircleMarker(
+                    location=[row[col_lat], row[col_lon]],
+                    radius=7,
+                    color=c_color,
+                    fill=True,
+                    fill_color=c_color,
+                    fill_opacity=0.85,
+                    popup=folium.Popup(popup_html, max_width=220)
+                ).add_to(m)
+
+        # Centroid Markers (Pusat Klaster K-Means)
         for c_idx, c_coord in enumerate(kmeans.cluster_centers_):
+            c_color = cluster_colors[c_idx % len(cluster_colors)]
             folium.Marker(
                 location=[c_coord[0], c_coord[1]],
-                popup=f"Pusat Centroid Klaster {c_idx}",
-                icon=folium.Icon(color='white', icon='star', prefix='fa')
+                popup=f"<b>Pusat Centroid Klaster {c_idx}</b>",
+                icon=folium.Icon(color='black', icon_color=c_color, icon='coffee', prefix='fa')
             ).add_to(m)
-            
-        st_folium(m, width="100%", height=480)
+
+        st_folium(m, width="100%", height=490)
         st.markdown('</div>', unsafe_allow_html=True)
         
     with col_form:
         st.markdown('<div class="gemini-card">', unsafe_allow_html=True)
         st.markdown("### 🔍 Evaluasi Lokasi Baru")
-        st.caption("Uji koordinat lokasi rencana outlet baru untuk memprediksi karakteristik zona.")
+        st.caption("Uji koordinat lokasi rencana outlet baru untuk memprediksi karakteristik zona secara presisi.")
         st.markdown("<br>", unsafe_allow_html=True)
         
         in_lat = st.number_input(f"Latitude ({col_lat})", value=float(center_lat), format="%.6f")
@@ -497,25 +541,27 @@ elif page == "2. Clustering Gerai Kopi (Geospasial)":
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("📌 Analisis Karakteristik Zona"):
             pred_cluster = kmeans.predict([[in_lat, in_lon]])[0]
+            assigned_color = cluster_colors[pred_cluster % len(cluster_colors)]
             
             st.markdown(f"""
-                <div style="background: rgba(168, 199, 250, 0.1); padding: 14px 18px; border-radius: 12px; margin-bottom: 20px; border: 1px solid rgba(168, 199, 250, 0.3); font-weight: 600; color: #a8c7fa;">
-                    📌 Hasil Pemetaan: Tergolong dalam <b>Klaster {pred_cluster}</b>
+                <div style="background: rgba(30, 41, 59, 0.7); padding: 16px; border-radius: 14px; margin-bottom: 20px; border: 1px solid {assigned_color}; font-weight: 600; color: #f8fafc; display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 14px; height: 14px; border-radius: 50%; background: {assigned_color}; box-shadow: 0 0 10px {assigned_color};"></div>
+                    <div>Hasil Pemetaan: Tergolong dalam <b style="color: {assigned_color};">Klaster {pred_cluster}</b></div>
                 </div>
             """, unsafe_allow_html=True)
             
             if pred_cluster == 0:
                 st.markdown("""
-                    <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3); color: #fde68a; padding: 18px; border-radius: 14px;">
-                        <b style="font-size: 1rem;">📍 ZONA KEPADATAN RENDAH (BLUE OCEAN)</b><br>
-                        <span style="font-size: 0.85rem; opacity: 0.9;">Tingkat kompetisi antar-gerai rendah. Sangat potensial untuk ekspansi dan penguasaan pangsa pasar baru.</span>
+                    <div style="background: rgba(5, 213, 231, 0.08); border: 1px solid rgba(5, 213, 231, 0.3); color: #67e8f9; padding: 18px; border-radius: 14px;">
+                        <b style="font-size: 1rem;">📍 ZONA POTENSIAL (BLUE OCEAN)</b><br>
+                        <span style="font-size: 0.85rem; opacity: 0.9;">Tingkat kompetisi antar-gerai rendah. Sangat strategis untuk ekspansi awal dan mendominasi pasar baru.</span>
                     </div>
                 """, unsafe_allow_html=True)
             else:
                 st.markdown("""
-                    <div style="background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); color: #bfdbfe; padding: 18px; border-radius: 14px;">
-                        <b style="font-size: 1rem;">🏢 ZONA KEPADATAN TINGGI (RED OCEAN)</b><br>
-                        <span style="font-size: 0.85rem; opacity: 0.9;">Konsentrasi outlet tinggi. Menandakan basis konsumen yang terbukti besar namun dengan kompetisi ketat.</span>
+                    <div style="background: rgba(255, 42, 109, 0.08); border: 1px solid rgba(255, 42, 109, 0.3); color: #fca5a5; padding: 18px; border-radius: 14px;">
+                        <b style="font-size: 1rem;">🔥 ZONA PADAT (HIGH DENSITY)</b><br>
+                        <span style="font-size: 0.85rem; opacity: 0.9;">Konsentrasi gerai tinggi. Permintaan pasar terbukti sangat besar namun kompetisi antar merek cukup ketat.</span>
                     </div>
                 """, unsafe_allow_html=True)
                 
