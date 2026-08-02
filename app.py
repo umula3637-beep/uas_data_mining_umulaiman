@@ -259,7 +259,7 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
     
-    st.markdown("<p style='font-size: 0.72rem; color: #64748b; font-weight: 800; letter-spacing: 1px; margin-bottom: 12px;'>NAVIKASI MODUL ENGINE</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size: 0.72rem; color: #64748b; font-weight: 800; letter-spacing: 1px; margin-bottom: 12px;'>NAVIGASI MODUL ENGINE</p>", unsafe_allow_html=True)
     
     page = st.radio(
         "Pilih Halaman:",
@@ -456,19 +456,23 @@ elif page == "2. Clustering Gerai Kopi (Geospasial)":
         st.error(f"⚠️ Gagal memuat dataset/model clustering. Detail: {e}")
         st.stop()
 
-    lat_candidates = [c for c in df_kopi.columns if any(k in c.lower() for k in ['lat', 'y', 'lintang'])]
-    lon_candidates = [c for c in df_kopi.columns if any(k in c.lower() for k in ['lon', 'long', 'lng', 'x', 'bujur'])]
+    # Cari nama kolom koordinat
+    lat_candidates = [c for c in df_kopi.columns if any(k in c.lower() for k in ['lat', 'y', 'lintang', 'latitude'])]
+    lon_candidates = [c for c in df_kopi.columns if any(k in c.lower() for k in ['lon', 'long', 'lng', 'x', 'bujur', 'longitude'])]
     
     if not lat_candidates or not lon_candidates:
-        st.error("⚠️ Kolom koordinat Latitude/Longitude tidak ditemukan pada dataset.")
+        st.error(f"⚠️ Kolom koordinat Latitude/Longitude tidak ditemukan pada dataset. Kolom yang ada: {list(df_kopi.columns)}")
         st.stop()
         
     col_lat, col_lon = lat_candidates[0], lon_candidates[0]
-    
     X_kopi = df_kopi[[col_lat, col_lon]]
-    df_kopi['Cluster'] = kmeans.labels_
     
-    name_candidates = [c for c in df_kopi.columns if any(k in c.lower() for k in ['nama', 'name', 'gerai', 'outlet', 'store'])]
+    try:
+        df_kopi['Cluster'] = kmeans.predict(X_kopi)
+    except Exception:
+        df_kopi['Cluster'] = kmeans.labels_
+    
+    name_candidates = [c for c in df_kopi.columns if any(k in c.lower() for k in ['nama', 'name', 'gerai', 'outlet', 'store', 'toko'])]
     col_name = name_candidates[0] if name_candidates else None
     
     col_map, col_form = st.columns([1.35, 0.65])
@@ -482,12 +486,11 @@ elif page == "2. Clustering Gerai Kopi (Geospasial)":
         with m_top_r:
             map_view = st.radio("Mode Layers:", ["Cluster Markers", "Heatmap Density", "Grouped Clusters"], horizontal=True, label_visibility="collapsed")
 
-        center_lat = df_kopi[col_lat].mean()
-        center_lon = df_kopi[col_lon].mean()
+        center_lat = float(df_kopi[col_lat].mean())
+        center_lon = float(df_kopi[col_lon].mean())
         
         m = folium.Map(location=[center_lat, center_lon], zoom_start=12, tiles="CartoDB dark_matter")
         
-        # Neon Palette
         cluster_colors = ['#00E676', '#FF2A6D', '#05D5E7', '#FFD600', '#DDA0DD']
         
         if map_view == "Heatmap Density":
@@ -532,13 +535,14 @@ elif page == "2. Clustering Gerai Kopi (Geospasial)":
                 ).add_to(m)
 
         # Centroid Markers
-        for c_idx, c_coord in enumerate(kmeans.cluster_centers_):
-            c_color = cluster_colors[c_idx % len(cluster_colors)]
-            folium.Marker(
-                location=[c_coord[0], c_coord[1]],
-                popup=f"<b>Pusat Centroid Klaster {c_idx}</b>",
-                icon=folium.Icon(color='black', icon_color=c_color, icon='coffee', prefix='fa')
-            ).add_to(m)
+        if hasattr(kmeans, 'cluster_centers_'):
+            for c_idx, c_coord in enumerate(kmeans.cluster_centers_):
+                c_color = cluster_colors[c_idx % len(cluster_colors)]
+                folium.Marker(
+                    location=[c_coord[0], c_coord[1]],
+                    popup=f"<b>Pusat Centroid Klaster {c_idx}</b>",
+                    icon=folium.Icon(color='black', icon_color=c_color, icon='coffee', prefix='fa')
+                ).add_to(m)
 
         st_folium(m, width="100%", height=500)
         st.markdown('</div>', unsafe_allow_html=True)
@@ -554,29 +558,33 @@ elif page == "2. Clustering Gerai Kopi (Geospasial)":
             
         st.markdown("<br>", unsafe_allow_html=True)
         if st.button("📌 Analisis Karakteristik Zona"):
-            pred_cluster = kmeans.predict([[in_lat, in_lon]])[0]
-            assigned_color = cluster_colors[pred_cluster % len(cluster_colors)]
-            
-            st.markdown(f"""
-                <div style="background: rgba(11, 17, 32, 0.8); padding: 18px; border-radius: 16px; margin-bottom: 20px; border: 1px solid {assigned_color}; font-weight: 600; color: #f8fafc; display: flex; align-items: center; gap: 12px;">
-                    <div style="width: 16px; height: 16px; border-radius: 50%; background: {assigned_color}; box-shadow: 0 0 12px {assigned_color};"></div>
-                    <div>Hasil Zonasi: Masuk dalam <b style="color: {assigned_color};">Klaster {pred_cluster}</b></div>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            if pred_cluster == 0:
-                st.markdown("""
-                    <div style="background: rgba(5, 213, 231, 0.08); border: 1px solid rgba(5, 213, 231, 0.35); color: #67e8f9; padding: 18px; border-radius: 16px;">
-                        <b style="font-size: 1rem;">📍 ZONA POTENSIAL (BLUE OCEAN)</b><br>
-                        <span style="font-size: 0.85rem; opacity: 0.9;">Tingkat kompetisi relatif rendah. Sangat strategis untuk membangun *brand awareness* wilayah baru.</span>
+            try:
+                input_df = pd.DataFrame([[in_lat, in_lon]], columns=[col_lat, col_lon])
+                pred_cluster = int(kmeans.predict(input_df)[0])
+                assigned_color = cluster_colors[pred_cluster % len(cluster_colors)]
+                
+                st.markdown(f"""
+                    <div style="background: rgba(11, 17, 32, 0.8); padding: 18px; border-radius: 16px; margin-bottom: 20px; border: 1px solid {assigned_color}; font-weight: 600; color: #f8fafc; display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 16px; height: 16px; border-radius: 50%; background: {assigned_color}; box-shadow: 0 0 12px {assigned_color};"></div>
+                        <div>Hasil Zonasi: Masuk dalam <b style="color: {assigned_color};">Klaster {pred_cluster}</b></div>
                     </div>
                 """, unsafe_allow_html=True)
-            else:
-                st.markdown("""
-                    <div style="background: rgba(255, 42, 109, 0.08); border: 1px solid rgba(255, 42, 109, 0.35); color: #fca5a5; padding: 18px; border-radius: 16px;">
-                        <b style="font-size: 1rem;">🔥 ZONA PADAT (HIGH DENSITY)</b><br>
-                        <span style="font-size: 0.85rem; opacity: 0.9;">Konsentrasi gerai tinggi. Traksi pasar sangat kuat namun tingkat persaingan antar-gerai tinggi.</span>
-                    </div>
-                """, unsafe_allow_html=True)
+                
+                if pred_cluster == 0:
+                    st.markdown("""
+                        <div style="background: rgba(5, 213, 231, 0.08); border: 1px solid rgba(5, 213, 231, 0.35); color: #67e8f9; padding: 18px; border-radius: 16px;">
+                            <b style="font-size: 1rem;">📍 ZONA POTENSIAL (BLUE OCEAN)</b><br>
+                            <span style="font-size: 0.85rem; opacity: 0.9;">Tingkat kompetisi relatif rendah. Sangat strategis untuk membangun *brand awareness* wilayah baru.</span>
+                        </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.markdown("""
+                        <div style="background: rgba(255, 42, 109, 0.08); border: 1px solid rgba(255, 42, 109, 0.35); color: #fca5a5; padding: 18px; border-radius: 16px;">
+                            <b style="font-size: 1rem;">🔥 ZONA PADAT (HIGH DENSITY)</b><br>
+                            <span style="font-size: 0.85rem; opacity: 0.9;">Konsentrasi gerai tinggi. Traksi pasar sangat kuat namun tingkat persaingan antar-gerai tinggi.</span>
+                        </div>
+                    """, unsafe_allow_html=True)
+            except Exception as err:
+                st.error(f"Gagal memprediksi zona. Detail: {err}")
                 
         st.markdown('</div>', unsafe_allow_html=True)
